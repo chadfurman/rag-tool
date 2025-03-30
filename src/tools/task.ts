@@ -1,6 +1,6 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { fileAgent } from "../agents/fileAgent";
+import { fileAgent } from "../agents/fileAgent.js";
 import path from 'path';
 import { cwd } from 'process';
 
@@ -21,7 +21,8 @@ export const task = createTool({
     workingDir: z.string().optional().default(cwd())
       .describe("Base directory for file operations")
   }),
-  execute: async ({ context: { prompt, verbose, workingDir } }, { signal }) => {
+  execute: async ({ context: { prompt, verbose = false, workingDir = process.cwd() } }, options) => {
+    const signal = options?.signal;
     const steps: ExecutionStep[] = [];
     let currentDir = workingDir;
 
@@ -58,7 +59,13 @@ export const task = createTool({
       }
     ], {
       maxSteps: 15,
-      onStepFinish: async ({ toolCalls, toolResults }) => {
+      onStepFinish: async ({ 
+        toolCalls, 
+        toolResults 
+      }: { 
+        toolCalls?: Array<{ toolName: string; args: any }>;
+        toolResults?: Array<{ success: boolean; output?: any; error?: Error }>;
+      }) => {
         if (!toolCalls?.length) return;
 
         for (let i = 0; i < toolCalls.length; i++) {

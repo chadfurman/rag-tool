@@ -16,21 +16,21 @@ program
   .argument('[task...]', 'Task to perform')
   .action(async (task, options) => {
     try {
-      // Configure agent based on provider
       const provider = options.provider === 'openai' ? openai(options.model) : anthropic(options.model);
-      fileAgent.model = provider;
-      
       const taskText = task.join(' ');
+      
       if (options.verbose) {
         console.log(`Executing task with ${options.provider} (${options.model}) in ${options.workingDir}: ${taskText}`);
       }
 
-      const result = await fileAgent.generate([
+      const result = await fileAgent.withModel(provider).generate([
         { 
           role: 'user', 
-          content: taskText,
-          workingDir: options.workingDir,
-          verbose: options.verbose
+          content: `${taskText}\n\nWorking Directory: ${options.workingDir}`,
+          metadata: {
+            workingDir: options.workingDir,
+            verbose: options.verbose
+          }
         }
       ], {
         maxSteps: 10
@@ -39,7 +39,10 @@ program
       console.log('\nResult:');
       console.log(result.text);
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error('Error:', error instanceof Error ? error.message : String(error));
+      if (error instanceof Error && error.message.includes('x-api-key')) {
+        console.error('\nPlease ensure you have set the proper API key for your AI provider');
+      }
       process.exit(1);
     }
   });
