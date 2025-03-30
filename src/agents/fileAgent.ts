@@ -1,4 +1,4 @@
-import { Agent } from "@mastra/core/agent";
+import { Agent } from "@mastra/core";
 import { find } from "../tools/find.js";
 import { grep } from "../tools/grep.js";
 import { ls } from "../tools/ls.js";

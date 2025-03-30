@@ -13,7 +13,7 @@ type ExecutionStep = {
 
 import type { Tool } from "@mastra/core/tools";
 
-export const task: Tool = createTool({
+export const task = createTool({
   id: "file-task-orchestrator",
   description: "Orchestrates complex file operations through multi-step planning and execution",
   inputSchema: z.object({
@@ -50,7 +50,7 @@ export const task: Tool = createTool({
           "1. TOOL_NAME - PARAMS_JSON - PURPOSE\n" +
           "Include cd steps when changing directories"
       }
-    ], { signal });
+    ], { signal } as any); // Temporary workaround for signal typing
 
     if (verbose) console.log("== Execution Plan ==\n" + plan.text);
 
@@ -68,13 +68,9 @@ export const task: Tool = createTool({
       }
     ], {
       maxSteps: 15,
-      onStepFinish: async ({ 
-        toolCalls, 
-        toolResults 
-      }: { 
-        toolCalls?: Array<{ toolName: string; args: any }>;
-        toolResults?: Array<{ success: boolean; output?: any; error?: Error }>;
-      }) => {
+      onStepFinish: async (stepResult) => {
+        const toolCalls = stepResult.toolCalls;
+        const toolResults = stepResult.toolResults;
         if (!toolCalls?.length) return;
 
         for (let i = 0; i < toolCalls.length; i++) {
@@ -127,7 +123,7 @@ export const task: Tool = createTool({
           "3. Next steps\n" +
           "4. Current directory"
       }
-    ], { signal });
+    ], { signal } as any); // Temporary workaround for signal typing
 
     return {
       success: steps.every(s => !s.error),

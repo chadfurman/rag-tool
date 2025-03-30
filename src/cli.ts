@@ -23,7 +23,11 @@ program
         console.log(`Executing task with ${options.provider} (${options.model}) in ${options.workingDir}: ${taskText}`);
       }
 
-      const result = await fileAgent.withModel(provider).generate([
+      const agent = new Agent({
+        ...fileAgent.config,
+        model: provider
+      });
+      const result = await agent.generate([
         { 
           role: 'user', 
           content: `${taskText}\n\nWorking Directory: ${options.workingDir}`,
