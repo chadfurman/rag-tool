@@ -1,6 +1,6 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { readdir } from "fs/promises";
+import { readdir, stat } from "fs/promises";
 import path from "path";
 
 export const ls = createTool({
@@ -11,24 +11,38 @@ export const ls = createTool({
     all: z.boolean().optional().describe("Include hidden files"),
     long: z.boolean().optional().describe("Use long listing format")
   }),
-  execute: async ({ context: { path = ".", all = false, long = false } }) => {
+  execute: async ({ context: { path: dirPath = ".", all = false, long = false } }) => {
     try {
-      const files = await readdir(path, { 
+      const files = await readdir(dirPath, { 
         withFileTypes: true,
         encoding: 'utf8'
       });
 
-      return files
-        .filter(file => all || !file.name.startsWith('.'))
-        .map(file => ({
+      const results = [];
+      for (const file of files) {
+        if (!all && file.name.startsWith('.')) continue;
+        
+        const fullPath = path.join(dirPath, file.name);
+        const result: any = {
           name: file.name,
-          path: path.resolve(path, file.name),
-          type: file.isDirectory() ? 'directory' : 'file',
-          ...(long && {
-            size: file.isFile() ? file.size : undefined,
-            modified: file.mtime
-          })
-        }));
+          path: fullPath,
+          type: file.isDirectory() ? 'directory' : 'file'
+        };
+
+        if (long) {
+          try {
+            const stats = await stat(fullPath);
+            result.size = stats.size;
+            result.modified = stats.mtime;
+          } catch {
+            // Ignore stat errors
+          }
+        }
+
+        results.push(result);
+      }
+
+      return results;
     } catch (error) {
       throw new Error(`Failed to list directory: ${error instanceof Error ? error.message : String(error)}`);
     }

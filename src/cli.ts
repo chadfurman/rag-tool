@@ -2,7 +2,7 @@
 import { program } from 'commander';
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
-import { fileAgent } from './agents/fileAgent';
+import { fileAgent } from './agents/fileAgent.js';
 
 program
   .name('agent-script')

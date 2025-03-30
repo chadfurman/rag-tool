@@ -1,13 +1,18 @@
 import { Agent } from "@mastra/core/agent";
-import { find } from "../tools/find";
-import { grep } from "../tools/grep";
-import { ls } from "../tools/ls";
-import { cat } from "../tools/cat";
-import { read } from "../tools/read";
-import { task } from "../tools/task";
+import { find } from "../tools/find.js";
+import { grep } from "../tools/grep.js";
+import { ls } from "../tools/ls.js";
+import { cat } from "../tools/cat.js";
+import { read } from "../tools/read.js";
+import { task } from "../tools/task.js";
+import { anthropic } from '@ai-sdk/anthropic';
+
+// Create default model configuration
+const defaultModel = anthropic('claude-3-sonnet-20240229');
 
 export const fileAgent = new Agent({
   name: "File Agent",
+  model: defaultModel,
   instructions: `
     You are a helpful assistant that can perform file system operations.
     You have access to tools for finding, reading, and searching files.
