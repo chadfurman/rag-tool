@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
+import { Agent } from '@mastra/core';
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { fileAgent } from './agents/fileAgent.js';

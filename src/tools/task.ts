@@ -86,22 +86,22 @@ export const task = createTool({
           steps.push({
             tool: call.toolName,
             args: call.args,
-            result: result?.success ? result.output : undefined,
-            error: result?.error ? result.error.message : undefined
+            result: result?.result,
+            error: result?.result instanceof Error ? result.result.message : undefined
           });
 
           if (verbose) {
             console.log(`[Step ${steps.length}] ${call.toolName}:`);
             console.log("Args:", call.args);
-            if (result?.error) {
-              console.error("Error:", result.error.message);
+            if (result?.result instanceof Error) {
+              console.error("Error:", result.result.message);
             } else {
-              console.log("Result:", result?.output);
+              console.log("Result:", result?.result);
             }
           }
         }
       },
-      signal
+      signal: signal as AbortSignal
     });
 
     // Phase 3: Summary

@@ -10,8 +10,6 @@ import { anthropic } from '@ai-sdk/anthropic';
 // Create default model configuration
 const defaultModel = anthropic('claude-3-sonnet-20240229');
 
-import type { Agent } from "@mastra/core/agent";
-
 export const fileAgent: Agent = new Agent({
   name: "File Agent",
   model: defaultModel,
