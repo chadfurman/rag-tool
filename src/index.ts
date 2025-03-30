@@ -6,4 +6,5 @@ export const mastra = new Mastra({
   agents: { fileAgent }
 });
 
-export { fileAgent, task } from "./agents/fileAgent.js";
+export { fileAgent } from "./agents/fileAgent.js";
+export { task } from "./tools/task.js";

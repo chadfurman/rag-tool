@@ -11,7 +11,9 @@ type ExecutionStep = {
   error?: string;
 };
 
-export const task = createTool({
+import type { Tool } from "@mastra/core/tools";
+
+export const task: Tool = createTool({
   id: "file-task-orchestrator",
   description: "Orchestrates complex file operations through multi-step planning and execution",
   inputSchema: z.object({
@@ -21,8 +23,15 @@ export const task = createTool({
     workingDir: z.string().optional().default(cwd())
       .describe("Base directory for file operations")
   }),
-  execute: async ({ context: { prompt, verbose = false, workingDir = process.cwd() } }, options) => {
-    const signal = options?.signal;
+  execute: async ({ context: { prompt, verbose = false, workingDir = process.cwd() } }, options): Promise<{
+    success: boolean;
+    workingDir: string;
+    steps: number;
+    errors: number;
+    summary: string;
+    details?: any;
+  }> => {
+    const signal = (options as any)?.signal; // Temporary workaround for typing
     const steps: ExecutionStep[] = [];
     let currentDir = workingDir;
 
@@ -100,7 +109,7 @@ export const task = createTool({
     });
 
     // Phase 3: Summary
-    const summary = await fileAgent.generate([
+    const summary = await fileAgent.generate<{text: string}>([
       {
         role: "system",
         content: `Create a summary for task: ${prompt}\n\n` +
