@@ -50,7 +50,7 @@ export const task = createTool({
           "1. TOOL_NAME - PARAMS_JSON - PURPOSE\n" +
           "Include cd steps when changing directories"
       }
-    ], { signal } as any); // Temporary workaround for signal typing
+    ]); 
 
     if (verbose) console.log("== Execution Plan ==\n" + plan.text);
 
@@ -100,8 +100,7 @@ export const task = createTool({
             }
           }
         }
-      },
-      signal: signal as AbortSignal
+      }
     });
 
     // Phase 3: Summary
@@ -123,7 +122,7 @@ export const task = createTool({
           "3. Next steps\n" +
           "4. Current directory"
       }
-    ], { signal } as any); // Temporary workaround for signal typing
+    ]);
 
     return {
       success: steps.every(s => !s.error),

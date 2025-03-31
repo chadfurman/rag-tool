@@ -1,14 +1,25 @@
-import { Agent } from "@mastra/core";
+import { Agent } from "@mastra/core/agent";
 import { find } from "../tools/find.js";
 import { grep } from "../tools/grep.js";
 import { ls } from "../tools/ls.js";
 import { cat } from "../tools/cat.js";
 import { read } from "../tools/read.js";
 import { task } from "../tools/task.js";
-import { anthropic } from '@ai-sdk/anthropic';
+import { createAnthropic } from '@ai-sdk/anthropic';
 
-// Create default model configuration
-const defaultModel = anthropic('claude-3-sonnet-20240229');
+// Get API key from environment variable
+const apiKey = process.env.ANTHROPIC_API_KEY;
+if (!apiKey) {
+  console.warn("Warning: ANTHROPIC_API_KEY environment variable is not set");
+}
+
+// Create a custom Anthropic provider with explicit API key
+const anthropicProvider = createAnthropic({
+  apiKey: apiKey
+});
+
+// Create default model
+const defaultModel = anthropicProvider('claude-3-7-sonnet-20250219');
 
 export const fileAgent: Agent = new Agent({
   name: "File Agent",
