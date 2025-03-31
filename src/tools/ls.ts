@@ -1,17 +1,26 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { readdir, stat } from "fs/promises";
+import { readdir } from "fs/promises";
 import path from "path";
 
 export const ls = createTool({
   id: "List Files",
-  description: "List directory contents",
+  description: "List files and directories in a specified path. Use to explore directory contents before performing operations.",
   inputSchema: z.object({
-    path: z.string().optional().describe("Directory path (default: current directory)"),
-    all: z.boolean().optional().describe("Include hidden files"),
-    long: z.boolean().optional().describe("Use long listing format")
+    path: z.string().optional().describe("Directory path to list. Example: './', 'src/tools', '/usr/local/bin'. Default: './'"),
+    all: z.boolean().optional().describe("Include hidden files (those starting with '.'). Example: true. Default: false"),
   }),
-  execute: async ({ context: { path: dirPath = ".", all = false, long = false } }) => {
+  outputSchema: z.array(z.object({
+      name: z.string(),
+      path: z.string(),
+      type: z.string()
+    })),
+  execute: async (args) => {
+    // Safely extract parameters with defaults
+    const { context = {} } = args;
+    const dirPath = context.path || "."; 
+    const all = context.all || false;
+
     try {
       const files = await readdir(dirPath, { 
         withFileTypes: true,
@@ -28,16 +37,6 @@ export const ls = createTool({
           path: fullPath,
           type: file.isDirectory() ? 'directory' : 'file'
         };
-
-        if (long) {
-          try {
-            const stats = await stat(fullPath);
-            result.size = stats.size;
-            result.modified = stats.mtime;
-          } catch {
-            // Ignore stat errors
-          }
-        }
 
         results.push(result);
       }

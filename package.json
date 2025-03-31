@@ -8,9 +8,7 @@
     "build": "tsc",
     "start": "node dist/cli.js",
     "agent": "tsx src/cli.ts",
-    "enhanced": "tsx src/cli-enhanced.ts",
     "dev": "tsx watch src/cli.ts",
-    "dev:enhanced": "tsx watch src/cli-enhanced.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [],
@@ -18,16 +16,16 @@
   "license": "ISC",
   "description": "",
   "bin": {
-    "agent-script": "./src/cli.ts",
-    "rag-tool": "./src/cli-enhanced.ts"
+    "rag-tool": "./src/cli.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.2",
     "@ai-sdk/openai": "^1.3.4",
     "@anthropic-ai/sdk": "^0.19.2",
-    "@mastra/core": "^0.7.0",
+    "@mastra/core": "^0.7.0-alpha.3",
     "@mastra/memory": "^0.2.6",
     "commander": "^12.1.0",
+    "winston": "^3.17.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

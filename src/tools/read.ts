@@ -11,13 +11,23 @@ const parseRange = (range?: string) => {
 
 export const read = createTool({
   id: "Read File Range",
-  description: "Read specific portions of a file with line/character ranges",
+  description: "Read specific portions of a file with line or character ranges. REQUIRES 'file' parameter with the path.",
   inputSchema: z.object({
-    file: z.string().describe("Path to the file to read"),
-    lineRange: z.string().optional().describe("Line range in format 'start:end' or single line"),
-    charRange: z.string().optional().describe("Character range in format 'start:end' or single offset")
+    file: z.string().describe("REQUIRED: Path to the file to read. Example: 'src/index.ts', '/etc/hosts'"),
+    lineRange: z.string().optional().describe("Line range in format 'start:end' or single line. Example: '10:20', '5'"),
+    charRange: z.string().optional().describe("Character range in format 'start:end' or single offset. Example: '100:200', '50'")
   }),
-  execute: async ({ context: { file, lineRange, charRange } }) => {
+  execute: async (args) => {
+    // Safely extract parameters
+    const { context } = args;
+    const file = context.file;
+    const lineRange = context.lineRange;
+    const charRange = context.charRange;
+    
+    // If required parameter is missing, throw a clear error
+    if (!file) {
+      throw new Error('Missing required parameter: file');
+    }
     try {
       const absolutePath = path.resolve(file);
       const content = await readFile(absolutePath, 'utf8');
