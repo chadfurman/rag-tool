@@ -1,4 +1,6 @@
 import { Agent } from "@mastra/core/agent";
+import { createTool } from "@mastra/core/tools";
+import { z } from "zod";
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createMemoryStore, getThreadIdForDirectory } from "../memory/memoryStore.js";
 
@@ -8,7 +10,7 @@ import { grep } from "../tools/grep.js";
 import { ls } from "../tools/ls.js";
 import { cat } from "../tools/cat.js";
 import { read } from "../tools/read.js";
-import { task } from "../tools/task.js";
+import { createTaskTool } from "../tools/enhancedTask.js";
 
 // Default configurations
 const DEFAULT_MODEL = "claude-3-7-sonnet-20250219";
@@ -79,8 +81,11 @@ export function createEnhancedFileAgent(config: EnhancedFileAgentConfig = {}): A
     ? createMemoryStore(config.memoryConfig)
     : undefined;
 
-  // Create the agent with enhanced configuration
-  return new Agent({
+  // Create a self-referencing task tool
+  let task: ReturnType<typeof createTaskTool>;
+  
+  // Create agent with tools
+  const agent = new Agent({
     name: "Enhanced File Agent",
     model,
     memory,
@@ -91,9 +96,23 @@ export function createEnhancedFileAgent(config: EnhancedFileAgentConfig = {}): A
       ls,
       cat,
       read,
-      task
+      // We'll add a stub for the task tool initially
+      task: createTool({
+        id: "temp-task",
+        description: "Temporary task tool stub",
+        inputSchema: z.object({}),
+        execute: async () => ({})
+      })
     }
   });
+  
+  // Now create the real task tool with a reference to the agent
+  task = createTaskTool(agent);
+  
+  // Replace the stub tool with the real one
+  (agent as any).tools.task = task;
+  
+  return agent;
 }
 
 /**
